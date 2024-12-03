@@ -1,11 +1,10 @@
 import 'dotenv/config'
-import zod from 'zod'
+import { z } from 'zod'
 
-const envSchema = zod.object({
-  APP_ENV: zod
-    .enum(['development', 'test', 'production'])
-    .default('development'),
-  PORT: zod.coerce.number().default(3333)
+const envSchema = z.object({
+  APP_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.coerce.number().default(3333),
+  PASSWORD_SALT: z.string()
 })
 
 const _env = envSchema.safeParse(process.env)

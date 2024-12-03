@@ -2,7 +2,8 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { randomUUID, scryptSync } from 'node:crypto'
 import { z } from 'zod'
 import { db } from '../database'
-import { UserAlreadyExists } from '../exception'
+import { env } from '../env'
+import { UserAlreadyExists, UserNotFound } from '../exception'
 
 export const usersRoutes = (app: FastifyInstance) => {
   app.post('/', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -36,11 +37,35 @@ export const usersRoutes = (app: FastifyInstance) => {
       id,
       name,
       email,
-      password: scryptSync(password, 'salt', 64).toString('hex')
+      password: scryptSync(password, env.PASSWORD_SALT, 64).toString('hex')
     })
 
     return reply.status(201).send({
       id
     })
+  })
+
+  app.get('/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    const getUserParamsSchema = z.object({
+      id: z
+        .string({
+          required_error: "O campo 'id' é obrigatorio",
+          invalid_type_error: "O campo 'id' deve ser uma string"
+        })
+        .uuid({ message: "O campo 'id' deve ser um UUID" })
+    })
+
+    const { id } = getUserParamsSchema.parse(request.params)
+
+    const user = await db('users')
+      .select('id', 'name', 'email')
+      .where('id', id)
+      .first()
+
+    if (!user) {
+      throw UserNotFound.fromId(id)
+    }
+
+    return reply.status(200).send(user)
   })
 }
