@@ -4,12 +4,13 @@
 
 - [X] Deve ser possível criar um usuário
 - [X] Deve ser possível identificar o usuário entre as requisições
-- [ ] Deve ser possível registrar uma refeição feita, com as seguintes informações:
+- [X] Deve ser possível registrar uma refeição feita, com as seguintes informações:
+  
   _As refeições devem ser relacionadas a um usuário._
-  - [ ] Nome
-  - [ ] Descrição
-  - [ ] Data e Hora
-  - [ ] Está dentro ou não da dieta
+  - [X] Nome
+  - [X] Descrição
+  - [X] Data e Hora
+  - [X] Está dentro ou não da dieta
 - [ ] Deve ser possível editar uma refeição, podendo alterar todos os dados acima
 - [ ] Deve ser possível apagar uma refeição
 - [ ] Deve ser possível listar todas as refeições de um usuário
