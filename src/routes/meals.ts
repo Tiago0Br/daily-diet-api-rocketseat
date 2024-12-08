@@ -121,4 +121,42 @@ export const mealsRoutes = (app: FastifyInstance) => {
 
     return reply.status(204).send()
   })
+
+  app.get('/summary', async (request: FastifyRequest, reply: FastifyReply) => {
+    const sessionId = request.cookies.sessionId as UUID
+
+    const user = (await db('users')
+      .select('*')
+      .where('session_id', sessionId)
+      .first()) as User
+
+    const meals = await db('meals').select('*').where('user_id', user.id)
+    const totalMeals = meals.length
+    const mealsInDiet = meals.filter((meal) => meal.is_part_of_diet).length
+    const mealsNotInDiet = totalMeals - mealsInDiet
+
+    let longerSequenceOfMealsInDiet = 0
+    let currentSequence = 0
+
+    meals.forEach((meal) => {
+      if (meal.is_part_of_diet) {
+        currentSequence++
+      } else {
+        currentSequence = 0
+      }
+
+      if (currentSequence > longerSequenceOfMealsInDiet) {
+        longerSequenceOfMealsInDiet = currentSequence
+      }
+    })
+
+    return reply.status(200).send({
+      summary: {
+        total_meals: totalMeals,
+        total_meals_in_diet: mealsInDiet,
+        total_meals_not_in_diet: mealsNotInDiet,
+        longer_sequence_of_meals_in_diet: longerSequenceOfMealsInDiet
+      }
+    })
+  })
 }
